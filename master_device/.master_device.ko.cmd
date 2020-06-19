@@ -1,0 +1,1 @@
+cmd_/home/osproject/Desktop/MyOS-Project-2/master_device/master_device.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/osproject/Desktop/MyOS-Project-2/master_device/master_device.ko /home/osproject/Desktop/MyOS-Project-2/master_device/master_device.o /home/osproject/Desktop/MyOS-Project-2/master_device/master_device.mod.o ;  true

@@ -1,0 +1,1 @@
+cmd_/home/osproject/Desktop/MyOS-Project-2/slave_device/slave_device.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/osproject/Desktop/MyOS-Project-2/slave_device/slave_device.ko /home/osproject/Desktop/MyOS-Project-2/slave_device/slave_device.o /home/osproject/Desktop/MyOS-Project-2/slave_device/slave_device.mod.o ;  true
