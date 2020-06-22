@@ -105,11 +105,6 @@ int main (int argc, char* argv[])
    
     strcpy(method, argv[q + 2]);
        
-
-
-   
-
-
     for (int times = 0; times < file_times; ++times) {
         offset = 0;
 
@@ -145,7 +140,7 @@ int main (int argc, char* argv[])
         switch(method[0]) 
         {
             case 'f': //fcntl 
-                do
+                do 
                 {
                     ret = read(file_fd, buf, sizeof(buf)); 
                     //write device
@@ -154,33 +149,31 @@ int main (int argc, char* argv[])
                 break;
             case 'm': //mmap
                 while (offset < file_size) {
-                    //printf("file_fd %d offset %d\n", file_fd, offset);
                     if((src = mmap(NULL, PAGE_SIZE, PROT_READ, MAP_SHARED, file_fd, offset)) == (void *) -1) {
-                        perror("map input file");
+                        perror("map input file fail");
                         return 1;
                     }
-                    uintptr_t vaddr, paddr = 0;
-                    //printf("%p\n", src);
-                    
-                    
-                    if((dst = mmap(NULL, PAGE_SIZE, PROT_WRITE, MAP_SHARED, dev_fd, offset)) == (void *) -1) {
-                        perror("map output device");
-                        return 1;
-                    }
-                    
+
                     do {
                         int len = (offset + BUF_SIZE > file_size ? file_size % BUF_SIZE : BUF_SIZE);
-                        memcpy(dst, src, len);
+                        write(dev_fd, src+offset%PAGE_SIZE, len); 
                         offset = offset + len;
-                        ioctl(dev_fd, 0x12345678, len);
+
                     } while (offset < file_size && offset % PAGE_SIZE != 0);
                     ioctl(dev_fd, 0x12345676, (unsigned long)src);
-                    virt_to_phys_user(&paddr, (uintptr_t)src);
-                    //printf("0x%jx\n", (uintmax_t)paddr);
-                    //sprintf(dmesgMess, "0x%jx\n", (uintmax_t)paddr);
-                    //syscall(335,dmesgMess);
-                    munmap(src, PAGE_SIZE);
+
+                    if(munmap(src, PAGE_SIZE)==-1){
+                        perror("unmap fail");
+                        return 1;
+                    }
                 }
+                
+
+                
+
+
+
+
                 
                 break;
         }
@@ -192,7 +185,7 @@ int main (int argc, char* argv[])
         }
         gettimeofday(&end, NULL);
         trans_time = (end.tv_sec - start.tv_sec)*1000 + (end.tv_usec - start.tv_usec)*0.0001;
-        printf("Transmission time: %lf ms, File size: %ld bytes\n", trans_time, file_size / 8);
+        printf("Transmission time: %lf ms, File size: %ld bytes\n", trans_time, file_size);
 
         
 

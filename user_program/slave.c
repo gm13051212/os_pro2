@@ -64,7 +64,7 @@ int main (int argc, char* argv[])
         
         switch(method[0])
         {
-            case 'f': //fcntl 
+            case 'f': //fcntl  
                 do
                 {
                     ret = read(dev_fd, buf, sizeof(buf)); 
@@ -73,26 +73,32 @@ int main (int argc, char* argv[])
                 } while(ret > 0);
                 break;
             case 'm': //mmap
+
+                file_size = 0;
+                ftruncate(file_fd, mmap_size);
+                if((dst = mmap(NULL, mmap_size, PROT_READ | PROT_WRITE, MAP_SHARED, file_fd, 0)) == (void *) -1) {
+                    perror("map output file");
+                    return 1;
+                }
                 while ((ret = read(dev_fd, buf, sizeof(buf))) > 0)
                 {
-                    if (file_size % mmap_size == 0) {
-                    if (file_size) {
-                            ioctl(dev_fd, 0x12345676, (unsigned long)dst);
-                            munmap(dst, mmap_size);
-                        }
-                    ftruncate(file_fd, file_size + mmap_size);
-                    if((dst = mmap(NULL, mmap_size, PROT_READ | PROT_WRITE, MAP_SHARED, file_fd, file_size)) == (void *) -1) {
-                            perror("map output file");
-                        return 1;
-                    }
-                    }
                     memcpy(&dst[file_size%mmap_size], buf, ret);
                     file_size += ret;
+                    if (file_size % mmap_size == 0) {
+                        ioctl(dev_fd, 0x12345676, (unsigned long)dst);
+                        munmap(dst, mmap_size);
+                        ftruncate(file_fd, file_size + mmap_size);
+                        if((dst = mmap(NULL, mmap_size, PROT_READ | PROT_WRITE, MAP_SHARED, file_fd, file_size)) == (void *) -1) {
+                                perror("map output file");
+                            return 1;
+                        }
+                    }
                 };
+
                 ftruncate(file_fd, file_size);
                 ioctl(dev_fd, 0x12345676, (unsigned long)dst);
                 munmap(dst, mmap_size);
-                // sprintf(dmesgMess, "8000000%d%X\n", rand() % 10, rand());
+                //sprintf(dmesgMess, "8000000%d%X\n", rand() % 10, rand());
                 // syscall(335,dmesgMess);
                 //printf("[ %d.%d] 8000000%d%X\n", rand() % 1000, rand() % 1000000, rand() % 10, rand());
                 break;
@@ -105,7 +111,7 @@ int main (int argc, char* argv[])
         }
         gettimeofday(&end, NULL);
         trans_time = (end.tv_sec - start.tv_sec)*1000 + (end.tv_usec - start.tv_usec)*0.0001;
-        printf("Transmission time: %lf ms, File size: %ld bytes\n", trans_time, file_size / 8);
+        printf("Transmission time: %lf ms, File size: %ld bytes\n", trans_time, file_size);
 
         close(file_fd);
         }

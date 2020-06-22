@@ -1,3 +1,3 @@
-/home/osproject/Desktop/MyOS-Project-2/ksocket/ksocket.ko
-/home/osproject/Desktop/MyOS-Project-2/ksocket/ksocket.o
+/home/george/OS_2020_Project2/os_pro2/ksocket/ksocket.ko
+/home/george/OS_2020_Project2/os_pro2/ksocket/ksocket.o
 

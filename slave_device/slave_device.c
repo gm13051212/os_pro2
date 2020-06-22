@@ -62,7 +62,7 @@ static struct sockaddr_in addr_srv; //address of the master server
 
 
 // for mmap
-static int my_mmap(struct file *filp, struct vm_area_struct *vmAddr);
+
 void mmapOpen(struct vm_area_struct *vmAddr) {}
 void mmapClose(struct vm_area_struct *vmAddr) {}
 
@@ -74,8 +74,7 @@ static struct file_operations slave_fops = {
     .open = slave_open,
     .read = receive_msg,
     .release = slave_close,
-    // for mmap
-    .mmap = my_mmap
+
 };
 
 
@@ -144,7 +143,7 @@ static long slave_ioctl(struct file *file, unsigned int ioctl_num, unsigned long
     pte_t *ptep, pte;
     old_fs = get_fs();
     set_fs(KERNEL_DS);
-
+ 
     printk("slave device ioctl");
 
     switch(ioctl_num){
@@ -192,6 +191,7 @@ static long slave_ioctl(struct file *file, unsigned int ioctl_num, unsigned long
             ret = 0;
             break;
         default:
+            printk("Hello World: %lx\n",ioctl_num);
             pgd = pgd_offset(current->mm, ioctl_param);
             p4d = p4d_offset(pgd, ioctl_param);
             pud = pud_offset(p4d, ioctl_param);
@@ -218,17 +218,7 @@ ssize_t receive_msg(struct file *filp, char *buf, size_t count, loff_t *offp )
     return len;
 }
 
-// for mmap
-static int my_mmap(struct file *filp, struct vm_area_struct *vmAddr)
-{
-	if (remap_pfn_range(vmAddr, vmAddr->vm_start, vmAddr->vm_pgoff, vmAddr->vm_end - vmAddr->vm_start, vmAddr->vm_page_prot))
-		return -EIO;
-	vmAddr->vm_flags |= VM_RESERVED;
-	vmAddr->vm_private_data = filp->private_data;
-	vmAddr->vm_ops = &mmap_vm_ops;
-	mmapOpen(vmAddr);
-	return 0;
-}
+
 
 module_init(slave_init);
 module_exit(slave_exit);

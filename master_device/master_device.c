@@ -74,7 +74,7 @@ static struct file_operations master_fops = {
     .write = send_msg,
     .release = master_close,
 	// for mmap
-	.mmap = my_mmap
+//	.mmap = my_mmap
 };
 
 // for mmap
@@ -166,7 +166,7 @@ static long master_ioctl(struct file *file, unsigned int ioctl_num, unsigned lon
 {
     long ret = -EINVAL;
     size_t data_size = 0, offset = 0;
-    char *tmp;
+    char *tmp; 
     pgd_t *pgd;
     p4d_t *p4d;
     pud_t *pud;
@@ -191,7 +191,8 @@ static long master_ioctl(struct file *file, unsigned int ioctl_num, unsigned lon
         	ret = 0;
         	break;
         case master_IOCTL_MMAP:
-        	ret = ksend(sockfd_cli, file->private_data, ioctl_param, 0);
+        //	ret = ksend(sockfd_cli, file->private_data, ioctl_param, 0);
+            
         	break;
         case master_IOCTL_EXIT:
         	if(kclose(sockfd_cli) == -1)
@@ -230,16 +231,16 @@ static ssize_t send_msg(struct file *file, const char __user *buf, size_t count,
 
 
 // for mmap
-static int my_mmap(struct file *filp, struct vm_area_struct *vmAddr)
-{
-	if (remap_pfn_range(vmAddr, vmAddr->vm_start, vmAddr->vm_pgoff, vmAddr->vm_end - vmAddr->vm_start, vmAddr->vm_page_prot))
-		return -EIO;
-	vmAddr->vm_flags |= VM_RESERVED;
-	vmAddr->vm_private_data = filp->private_data;
-	vmAddr->vm_ops = &mmap_vm_ops;
-	mmapOpen(vmAddr);
-	return 0;
-}
+// static int my_mmap(struct file *filp, struct vm_area_struct *vmAddr)
+// {
+// 	if (remap_pfn_range(vmAddr, vmAddr->vm_start, vmAddr->vm_pgoff, vmAddr->vm_end - vmAddr->vm_start, vmAddr->vm_page_prot))
+// 		return -EIO;
+// 	vmAddr->vm_flags |= VM_RESERVED;
+// 	vmAddr->vm_private_data = filp->private_data;
+// 	vmAddr->vm_ops = &mmap_vm_ops;
+// 	mmapOpen(vmAddr);
+// 	return 0;
+// }
 
 
 module_init(master_init);
