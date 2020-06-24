@@ -62,9 +62,11 @@ int main (int argc, char* argv[])
 
         char *dst;
         
+        file_size ＝ 0;
         switch(method[0])
         {
             case 'f': //fcntl  
+                
                 do
                 {
                     ret = read(dev_fd, buf, sizeof(buf)); 
@@ -74,7 +76,6 @@ int main (int argc, char* argv[])
                 break;
             case 'm': //mmap
 
-                file_size = 0;
                 ftruncate(file_fd, mmap_size);
                 if((dst = mmap(NULL, mmap_size, PROT_READ | PROT_WRITE, MAP_SHARED, file_fd, 0)) == (void *) -1) {
                     perror("map output file");
